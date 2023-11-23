@@ -1,0 +1,55 @@
+---
+- name: Configuraciones para instalar la appWeb
+  gather_facts: false
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: Actualizar el repositorio y la caché de apt-get
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Instalar paquetes
+      apt:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - apache2
+        - php
+        - mysql-server
+        - php-mysql
+        - python3-pymysql
+
+    - name: Clonar  app web "Login" del repositorio
+      git:
+        repo: "https://github.com/Liz1908/web-LoginMIO"
+        dest: /var/www/html/web-LoginMIO
+
+    - name: Cambio del puerto por defecto que es el 80 en /etc/apache2/ports.conf
+      lineinfile:
+        path: /etc/apache2/ports.conf
+        regexp: "^Listen 8080"
+        line: "Listen 80"
+
+    - name: Cambio el puerto a 80 en /etc/apache2/site-enabled/000-default.conf
+      lineinfile:
+        path: /etc/apache2/sites-enabled/000-default.conf
+        regexp: '^<VirtualHost \*:8080>'
+        line: "<VirtualHost *:80>"
+
+    - name: Establecer contraseña del usuario de la base de datos
+      mysql_user:
+        name: yeu
+        password: "12345"
+        state: present
+      become_user: root
+
+    - name: Eliminar cuentas anónimas y base de datos de prueba
+      mysql_db:
+        name: test
+        state: absent
+
+    - name: Configurar firewall para permitir tráfico HTTP
+      ufw:
+        rule: allow
+        port: 80

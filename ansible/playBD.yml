@@ -1,0 +1,12 @@
+---
+- hosts: all
+  become: true
+  tasks:
+    - name: Create database
+      mysql_db: name=usuarios state=present login_user=root 
+login_password=""
+    - name: add sample data to db
+      copy: src=/app/tableDB.sql dest=/tmp/tableDB.sql
+    - name: insert sample into db
+      mysql_db: name=usuarios state=import target=/tmp/tableDB.sql 
+login_user=root login_password=""

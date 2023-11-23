@@ -1,0 +1,7 @@
+---
+mysql_root_password: ""
+app_user: "yeumar"
+http_host: "ymarin.com"
+http_conf: "ymarin.com.conf"
+http_port: "80"
+disable_default: true
